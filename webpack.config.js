@@ -10,6 +10,7 @@ const ManifestPlugin            = require('webpack-manifest-plugin')
 const dev = process.env.NODE_ENV === 'dev'
 
 let config = {
+
   entry: './src/main.ts',
   
   devServer: {
@@ -18,6 +19,32 @@ let config = {
 
   module: {
       rules: [
+        {
+          test: /\.css$/,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                // you can specify a publicPath here
+                // by default it uses publicPath in webpackOptions.output
+                publicPath: './src/style/',
+                hmr: process.env.NODE_ENV === 'development',
+              },
+            },
+            'css-loader',
+          ],
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            'vue-style-loader',
+            {
+              loader: 'css-loader',
+              options: { modules: true }
+            },
+            'sass-loader'
+          ]
+        },
             {
               test: /\.js?$/,
               loader: 'babel-loader',
@@ -35,46 +62,22 @@ let config = {
               test:/\.vue$/,
               loader:'vue-loader',
             },
-            {
-              test: /\.css$/,
-              use: [
-                'vue-style-loader',
-                {
-                  loader: 'css-loader',
-                  options: {
-                    // enable CSS Modules
-                    modules: true,
-                  }
-                }
-              ]
-            },
-            {
-              test: /\.scss$/,
-              use: [
-                'vue-style-loader',
-                {
-                  loader: 'css-loader',
-                  options: { modules: true }
-                },
-                'sass-loader'
-              ]
-            }
   ]},
 
-  resolve: {
-    extensions: ['.js', '.ts', '.vue']
-  },
-  
+
   optimization: {
       minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
   },
 
   plugins: [
-      new VueLoaderPlugin(),
-
       new MiniCssExtractPlugin({
-          filename: 'style.css'
-        }),
+        // Options similar to the same options in webpackOptions.output
+        // all options are optional
+        filename: '[name].css',
+        chunkFilename: '[id].css',
+        ignoreOrder: false, // Enable to remove warnings about conflicting order
+      }),
+      new VueLoaderPlugin(),
   ]
 }
 
